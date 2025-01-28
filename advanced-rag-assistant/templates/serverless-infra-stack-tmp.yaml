@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: An AWS Serverless Application Model template describing serverless
+  Infrastructure.
+
+Resources:
+  InvokeBedrockKnowledgeBase:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: InvokeKnowledgeBaseFunction
+      CodeUri: s3://pDeploymentBucket/artifacts/InvokeBedrockKnowledgeBase.zip
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      MemorySize: 128
+      Timeout: 60
+      Tracing: Active
+      Environment:
+        Variables:
+          KNOWLEDGE_BASE_ID: !Ref KnowledgeBaseWithAoss
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:Retrieve
+                - bedrock:RetrieveAndGenerate
+              Resource: '*'
+
