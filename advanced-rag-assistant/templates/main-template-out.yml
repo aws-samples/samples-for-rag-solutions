@@ -62,7 +62,7 @@ Resources:
   KbRoleStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://e2e-rag-deployment-914787431788-us-east-1.s3.amazonaws.com/templates/kb-role-template.template
+      TemplateURL: https://vivekml-agentic-rag-multimodal.s3.amazonaws.com/templates/kb-role-template.template
       TimeoutInMinutes: 15
       Parameters:
         Q01pInputBucketName:
@@ -71,7 +71,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: KbRoleStack
     Properties:
-      TemplateURL: https://e2e-rag-deployment-914787431788-us-east-1.s3.amazonaws.com/templates/oss-infra-template.template
+      TemplateURL: https://vivekml-agentic-rag-multimodal.s3.amazonaws.com/templates/oss-infra-template.template
       TimeoutInMinutes: 15
       Parameters:
         Q03pEmbedModel:
@@ -92,7 +92,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: OSSInfraStack
     Properties:
-      TemplateURL: https://e2e-rag-deployment-914787431788-us-east-1.s3.amazonaws.com/templates/kb-infra-template.template
+      TemplateURL: https://vivekml-agentic-rag-multimodal.s3.amazonaws.com/templates/kb-infra-template.template
       TimeoutInMinutes: 15
       Parameters:
         Q01pInputBucketName:
@@ -126,7 +126,7 @@ Resources:
     Properties:
       FunctionName: InvokeKnowledgeBaseFunction
       Code:
-        S3Bucket: e2e-rag-deployment-914787431788-us-east-1
+        S3Bucket: vivekml-agentic-rag-multimodal
         S3Key: artifacts/InvokeBedrockKnowledgeBase.zip
       Handler: index.lambda_handler
       Runtime: python3.12

@@ -72,7 +72,7 @@ Resources:
       - python3.9
       - python3.10
       Content:
-        S3Bucket: e2e-rag-deployment-914787431788-us-east-1
+        S3Bucket: vivekml-agentic-rag-multimodal
         S3Key: artifacts/layers/opensearchpy-layer.zip
       Description: opensearchpy layer including requests, requests-aws4auth, and boto3-1.34.82
       LicenseInfo: Apache-2.0
@@ -145,10 +145,10 @@ Resources:
         Fn::GetAtt:
         - OpenSearchLambdaExecutionRole
         - Arn
-      Runtime: python3.8
+      Runtime: python3.9
       Timeout: 840
       Code:
-        S3Bucket: e2e-rag-deployment-914787431788-us-east-1
+        S3Bucket: vivekml-agentic-rag-multimodal
         S3Key: artifacts/custom-resource-lambda.zip
       Layers:
       - Ref: OpenSearchpyLayer
@@ -202,7 +202,7 @@ Resources:
       Runtime: nodejs18.x
       Timeout: 900
       Code:
-        S3Bucket: e2e-rag-deployment-914787431788-us-east-1
+        S3Bucket: vivekml-agentic-rag-multimodal
         S3Key: artifacts/provider-event-handler.zip
       Environment:
         Variables:
