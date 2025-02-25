@@ -4,6 +4,9 @@ Parameters:
   Q01pInputBucketName:
     Type: String
     Description: S3 bucket name - where input documents will be placed
+  Q01pSuppMultiModalBucket: 
+    Type: String
+    Description: S3 bucket name - where KB stores the images retrieved from the data source
 Resources:
   KbRole:
     Type: AWS::IAM::Role
@@ -60,18 +63,22 @@ Resources:
             Resource:
               Fn::Sub: arn:aws:s3:::${Q01pInputBucketName}/*
             Sid: S3GetObjectStatement
-      - PolicyName: RDSPolicy
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
           - Effect: Allow
             Action:
-            - rds-data:BatchExecuteStatement
-            - rds-data:ExecuteStatement
-            - rds:DescribeDBClusters
+            - s3:ListBucket
+            Resource: 
+              Fn::Sub: arn:aws:s3:::${Q01pSuppMultiModalBucket}
+            Sid: S3ListMultiModalBucketStatement
+          - Effect: Allow
+            Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
             Resource:
-              Fn::Sub: arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:*
-            Sid: RDSClusterStatement
+              Fn::Sub: arn:aws:s3:::${Q01pSuppMultiModalBucket}/*
+            Sid: S3ReadWriteMultiModalBucketStatement
+      
+
 Outputs:
   KbRoleArn:
     Value:

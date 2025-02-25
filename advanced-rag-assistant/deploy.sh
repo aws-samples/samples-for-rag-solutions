@@ -184,13 +184,6 @@ updated_yml_file_contents=$(sed "s/pDeploymentBucket/${DEPLOYMENT_BUCKET}/g"<<< 
 # Write the updated YAML file to a new file
 echo "$updated_yml_file_contents" >templates/oss-infra-template.template
 
-# Read the serverless-infra-stack-tmp.yaml file into a variable
-yml_file_contents=$(cat templates/serverless-infra-stack-tmp.yaml)
-# Use the sed command to replace the old parameter name with the new parameter name
-updated_yml_file_contents=$(sed "s/pDeploymentBucket/${DEPLOYMENT_BUCKET}/g"<<< "$yml_file_contents")
-# Write the updated YAML file to a new file
-echo "$updated_yml_file_contents" >templates/serverless-infra-stack.yaml
-
 # UPLOAD the templates to Deployment S3 Bucket
 LOCAL_TEMPLATES_DIR="templates"
 aws s3 cp ${LOCAL_TEMPLATES_DIR} s3://${DEPLOYMENT_BUCKET}/${LOCAL_TEMPLATES_DIR}/ --recursive

@@ -21,7 +21,13 @@ kb_id = os.environ.get("KNOWLEDGE_BASE_ID")
 #print (kb_id)
 
 # declare model id for calling RetrieveAndGenerate API
-model_id = "anthropic.claude-3-sonnet-20240229-v1:0"
+
+# Add value of model_id from environment variable
+if os.environ.get("MODEL_ID"):
+    model_id = os.environ.get("MODEL_ID")
+else:
+    model_id = "amazon.nova-pro-v1:0"
+
 model_arn = f'arn:aws:bedrock:{region}::foundation-model/{model_id}'
 bedrock_agent_runtime_client = boto3.client('bedrock-agent-runtime', config=config)
 

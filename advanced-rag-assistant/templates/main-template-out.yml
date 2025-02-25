@@ -29,18 +29,10 @@ Parameters:
     Default: e2e-rag-index
     AllowedPattern: ^[a-z0-9](-*[a-z0-9])*
     ConstraintDescription: Must be lowercase or numbers with a length of 1-63 characters
-  # Q10pVectorFieldName:
-  #   Type: String
-  #   Description: Vector field name
-  #   Default: bedrock-knowledge-base-default-vector
-  # Q11pMetaDataFieldName:
-  #   Type: String
-  #   Description: Metadata field name
-  #   Default: AMAZON_BEDROCK_METADATA
-  # Q12pTextFieldName:
-  #   Type: String
-  #   Description: Text field name
-  #   Default: AMAZON_BEDROCK_TEXT_CHUNK
+  ModelId:
+    Type: String
+    Default: amazon.nova-pro-v1:0
+    Description: ModelId to use for the Bedrock Knowledge Base
 Resources:
   #Create a S3 bucket
   KnowledgeBaseS3Bucket:
@@ -58,7 +50,23 @@ Resources:
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256              
+              SSEAlgorithm: AES256     
+  KBSuppMultiModalBucket:
+    Type: AWS::S3::Bucket
+    Description: Creating Amazon S3 bucket to hold images for knowledge base
+    Properties:
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256                                     
   KbRoleStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -67,6 +75,8 @@ Resources:
       Parameters:
         Q01pInputBucketName:
           Ref: KnowledgeBaseS3Bucket
+        Q01pSuppMultiModalBucket:
+          Ref: KBSuppMultiModalBucket
   OSSInfraStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: KbRoleStack
@@ -101,6 +111,8 @@ Resources:
           Ref: Q03pEmbedModel
         Q08pCollectionName:
           Ref: Q08pCollectionName
+        Q01pSuppMultiModalBucket:
+          Ref: KBSuppMultiModalBucket
         Q09pIndexName:
           Ref: Q09pIndexName
         # Q10pVectorFieldName:
@@ -140,6 +152,7 @@ Resources:
         Variables:
         #Get KNOWLEDGE_BASE_ID from CloudFormation stack outputs
           KNOWLEDGE_BASE_ID: !GetAtt KbInfraStack.Outputs.KBID
+          MODEL_ID: !Ref ModelId          
 # Create a Lambda role with below policies
   InvokeBedrockKnowledgeBaseRole:
     Type: AWS::IAM::Role
