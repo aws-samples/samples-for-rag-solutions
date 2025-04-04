@@ -1,1 +1,3 @@
-advanced-rag-assistant/streamlit/.env
+*/streamlit/.env
+artifacts/
+.DS_Store
