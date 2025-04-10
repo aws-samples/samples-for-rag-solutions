@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22   # Choose your Node.js version
+    commands:
+      # Install CDK CLI globally
+      - npm install -g aws-cdk
+
+  pre_build:
+    commands:
+      - cd streamlit-serverless/
+      # Create and Activate python3 virtual environment
+      - python3 -m venv .venv
+      - source .venv/bin/activate
+      # Install dependencies
+      - pip3 install -r requirements.txt
+      # Run CDK synth to validate
+      - cdk synth
+      # Run CDK Bootstrap
+      - cdk bootstrap
+
+  build:
+    commands:
+      # Deploy the CDK stack
+      - cdk deploy --require-approval never
+
+artifacts:
+  files:
+    - cdk.out/**/*

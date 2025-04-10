@@ -1,0 +1,198 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: end-to-end RAG solution using Knowledge bases for Amazon Bedrock
+Parameters:
+  Q03pEmbedModel:
+    Type: String
+    Description: Select Embedding model
+    AllowedValues:
+      - amazon.titan-embed-text-v2:0
+    Default: amazon.titan-embed-text-v2:0
+  Q07pVectorStore:
+    Type: String
+    Description: Select VectorStore
+    AllowedValues:
+    - Open-Search-Serverless
+    Default: Open-Search-Serverless
+  Q08pCollectionName:
+    Type: String
+    Description: Name of the Collection
+    MinLength: 1
+    MaxLength: 63
+    Default: e2e-rag-collection
+    AllowedPattern: ^[a-z0-9](-*[a-z0-9])*
+    ConstraintDescription: Must be lowercase or numbers with a length of 1-63 characters
+  Q09pIndexName:
+    Type: String
+    Description: Index name to be created in vector store
+    MinLength: 1
+    MaxLength: 63
+    Default: e2e-rag-index
+    AllowedPattern: ^[a-z0-9](-*[a-z0-9])*
+    ConstraintDescription: Must be lowercase or numbers with a length of 1-63 characters
+  ModelId:
+    Type: String
+    Default: anthropic.claude-3-sonnet-20240229-v1:0
+    Description: ModelId to use for the Bedrock Knowledge Base
+Resources:
+  #Create a S3 bucket
+  KnowledgeBaseS3Bucket:
+    Type: AWS::S3::Bucket
+    Description: Creating Amazon S3 bucket to hold source data for knowledge base
+    Properties:
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256     
+  KBSuppMultiModalBucket:
+    Type: AWS::S3::Bucket
+    Description: Creating Amazon S3 bucket to hold images for knowledge base
+    Properties:
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256                                     
+  KbRoleStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://pDeploymentBucket.s3.amazonaws.com/templates/kb-role-template.template
+      TimeoutInMinutes: 15
+      Parameters:
+        Q01pInputBucketName:
+          Ref: KnowledgeBaseS3Bucket
+        Q01pSuppMultiModalBucket:
+          Ref: KBSuppMultiModalBucket
+  OSSInfraStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: KbRoleStack
+    Properties:
+      TemplateURL: https://pDeploymentBucket.s3.amazonaws.com/templates/oss-infra-template.template
+      TimeoutInMinutes: 15
+      Parameters:
+        Q03pEmbedModel:
+          Ref: Q03pEmbedModel
+        Q08pCollectionName:
+          Ref: Q08pCollectionName
+        Q09pIndexName:
+          Ref: Q09pIndexName
+        pKbRole:
+          Fn::GetAtt:
+          - KbRoleStack
+          - Outputs.KbRole
+        pKbRoleArn:
+          Fn::GetAtt:
+          - KbRoleStack
+          - Outputs.KbRoleArn
+  KbInfraStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: OSSInfraStack
+    Properties:
+      TemplateURL: https://pDeploymentBucket.s3.amazonaws.com/templates/kb-infra-template.template
+      TimeoutInMinutes: 15
+      Parameters:
+        Q01pInputBucketName:
+          Ref: KnowledgeBaseS3Bucket
+        Q03pEmbedModel:
+          Ref: Q03pEmbedModel
+        Q08pCollectionName:
+          Ref: Q08pCollectionName
+        Q01pSuppMultiModalBucket:
+          Ref: KBSuppMultiModalBucket
+        Q09pIndexName:
+          Ref: Q09pIndexName
+        # Q10pVectorFieldName:
+        #   Ref: Q10pVectorFieldName
+        # Q11pMetaDataFieldName:
+        #   Ref: Q11pMetaDataFieldName
+        # Q12pTextFieldName:
+        #   Ref: Q12pTextFieldName
+        pCollectionArn:
+          Fn::GetAtt:
+          - OSSInfraStack
+          - Outputs.CollectionArn
+        pKbRoleArn:
+          Fn::GetAtt:
+          - KbRoleStack
+          - Outputs.KbRoleArn
+        pKbRole:
+          Fn::GetAtt:
+          - KbRoleStack
+          - Outputs.KbRole
+  InvokeBedrockKnowledgeBase:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: InvokeKnowledgeBaseFunction
+      Code:
+        S3Bucket: pDeploymentBucket
+        S3Key: artifacts/InvokeBedrockKnowledgeBase.zip
+      Handler: index.lambda_handler
+      Runtime: python3.12
+      Role:
+        Fn::GetAtt:
+        - InvokeBedrockKnowledgeBaseRole
+        - Arn
+      MemorySize: 128
+      Timeout: 60
+      Environment:
+        Variables:
+        #Get KNOWLEDGE_BASE_ID from CloudFormation stack outputs
+          KNOWLEDGE_BASE_ID: !GetAtt KbInfraStack.Outputs.KBID
+          MODEL_ID: !Ref ModelId          
+# Create a Lambda role with below policies
+  InvokeBedrockKnowledgeBaseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: InvokeKnowledgeBaseRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: InvokeKnowledgeBasePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:Retrieve
+                  - bedrock:RetrieveAndGenerate
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+
+Outputs:
+  KnowledgeBaseS3BucketName:
+    Description: S3 Bucket Name for Knowledge Base
+    Value:
+      Ref: KnowledgeBaseS3Bucket
+  KnowledgeBaseWithAoss:
+    Description: Knowledge Base ID
+    Value:
+      Fn::GetAtt:
+        - KbInfraStack
+        - Outputs.KBID
+  
