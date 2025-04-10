@@ -8,6 +8,8 @@ This solution demonstrates a comprehensive implementation of an advanced Generat
 - **Amazon OpenSearch Serverless**: Vector database
 - **Amazon S3**: Document storage
 - **AWS Lambda**: API integration with Bedrock Knowledge Base
+- **AWS Fargate for Amazon ECS**: Managed Container service
+- **Amazon CloudFront**: Securely deliver content with low latency and high transfer speeds 
 
 ## Prerequisites
 
@@ -21,7 +23,7 @@ This solution demonstrates a comprehensive implementation of an advanced Generat
 ## Solution Description
 When ingesting your data, Amazon Bedrock Knowledge Bases first splits your documents or content into manageable chunks for efficient data retrieval. The chunks are then converted to embeddings and written to a vector index (vector representation of the data), while maintaining a mapping to the original document. The vector embeddings allow the texts to be quantitatively compared.
 This solution utilizes [advanced parsing and chunking features](https://community.aws/content/2jU5zpqh4cal0Lm47MBdRmKLLJ5/a-developer-s-guide-to-advanced-chunking-and-parsing-with-amazon-bedrock?lang=en) of Amazon Bedrock Knowledge Bases. In addition to default and fixed size chunking, Knowledge bases has introduced semantic chunking and hierarchical chunking. If your document may benefit from inherent relationships within your document, it may be wise to use hierarchical chunking allowing for more granular and efficient retrieval. Some documents benefit from semantic chunking by preserving the contextual relationship in the chunks helping to ensure that the related information stays together in logical chunks.
-The solution uses streamlit application as the front end for providing the chatbot interface. The streamlit application is making a call to [AWS Lambda](https://aws.amazon.com/lambda/) function which in turn calls Amazon Bedrock Knowledge Bases [RetrieveAndGenerate](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent-runtime_RetrieveAndGenerate.html) API to get answer to the user's query.
+The solution uses streamlit application as the front end for providing the chatbot interface fronted by Amazon Cloudfront for low latency access. The streamlit application hosted on AWS Fargate for Amazon ECS which provides a managed container service. It's frontend by Amazon Application Load Balancer to provide load balancing across the containers and high availability. The streamlit application is making a call to [AWS Lambda](https://aws.amazon.com/lambda/) function which in turn calls Amazon Bedrock Knowledge Bases [RetrieveAndGenerate](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent-runtime_RetrieveAndGenerate.html) API to get answer to the user's query.
 
 
 ## Deployment Guide
