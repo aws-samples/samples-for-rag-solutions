@@ -32,7 +32,7 @@ The solution uses streamlit application as the front end for providing the chatb
 2. Clone the Git Repository and zip the source code
 
     ```bash
-    git clone <CLONE_URL>
+    git clone https://github.com/aws-samples/samples-for-agentic-rag.git
     cd samples-for-agentic-rag/advanced-rag-assistant-with-hosted-streamlit-app/
     zip -r ../advanced-rag-assistant-with-hosted-streamlit-app.zip ./* && cd ..
     ```
@@ -58,6 +58,7 @@ The solution uses streamlit application as the front end for providing the chatb
 1. Run `deploy.sh` to create AWS CloudFormation Template.
 
     ```bash
+    cd samples-for-agentic-rag/advanced-rag-assistant-with-hosted-streamlit-app
     bash deploy.sh  # Default bucket name: e2e-rag-deployment-${ACCOUNT_ID}-${AWS_REGION}
     ``` 
 
@@ -115,7 +116,7 @@ The solution uses streamlit application as the front end for providing the chatb
     aws iam attach-role-policy --role-name CodeBuildServiceRole-$AWS_REGION --policy-arn $(aws iam list-attached-role-policies --role-name $(aws sts get-caller-identity --query 'Arn' --output text | cut -d'/' -f2) --query 'AttachedPolicies[0].PolicyArn' --output text)
     ```
 
-2. Create an AWS CodeBuild project using Amazon S3 as source and start building the project
+2. Create an AWS CodeBuild project using Amazon S3 as source 
 
     ```bash
     export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
@@ -136,7 +137,10 @@ The solution uses streamlit application as the front end for providing the chatb
         \"privilegedMode\": true
     }" \
     --service-role $(aws iam get-role --role-name CodeBuildServiceRole-$AWS_REGION --query 'Role.Arn' --output text)
+    ```
+3. Start building the Codebuild project
 
+    ```bash
     aws codebuild start-build --project-name "advanced-rag-assistant-with-hosted-streamlit-app"
     ```
 
