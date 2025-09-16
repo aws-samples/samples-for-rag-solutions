@@ -1,11 +1,14 @@
-# Samples for Agentic RAG solutions 
+# Samples for RAG Solutions
 
-This repository contains samples and components for building Agentic RAG solutions.
+This repository is a repository of RAG(Retrieval Augmented Generation) based GenAI solutions to help solve real world use cases.
 
 ## Contents
 
-- [Advanced RAG Assistant](advanced-rag-assistant) - Sample utilizing advanced Retrieval Augmented Generation (RAG) features of [Amazon Bedrock Knowledge Bases](https://aws.amazon.com/bedrock/knowledge-bases/).
+- [Advanced RAG Assistant](advanced-rag-assistant) - Ideal for research use cases requiring advanced processing of complex graphs, images, and tables from documents. This solution utilizes advanced Retrieval Augmented Generation (RAG) features of [Amazon Bedrock Knowledge Bases](https://aws.amazon.com/bedrock/knowledge-bases/).
 
+- [Advanced RAG Assistant with Hosted Streamlit App](advanced-rag-assistant-with-hosted-streamlit-app) - An enhancement to the Advanced RAG Assistant that includes a hosted Streamlit application on AWS with infrastructure as code for easy deployment to your AWS environment.
+
+- [Legal RFI Solution](legal-rfi-assistant) - A Generative AI-powered application that automatically generates draft responses for Request for Information (RFI) and Request for Proposal (RFP) questions using Amazon Bedrock Knowledge Bases and RAG.
 
 ## Getting Started
 
@@ -21,7 +24,7 @@ To grant Bedrock access to your identity, you can:
 - Find your [Role](https://us-east-1.console.aws.amazon.com/iamv2/home?#/roles) (if using SageMaker or otherwise assuming an IAM Role), or else [User](https://us-east-1.console.aws.amazon.com/iamv2/home?#/users)
 - Select *Add Permissions > Create Inline Policy* to attach new inline permissions, open the *JSON* editor and paste in the below example policy:
 
-```
+```json
 {
     "Version": "2012-10-17",
     "Statement": [
