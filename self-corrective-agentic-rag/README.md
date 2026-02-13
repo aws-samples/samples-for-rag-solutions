@@ -68,8 +68,6 @@ This project implements a **Self-Corrective Agentic Retrieval-Augmented Generati
               └──────────┘
 ```
 
-![Self-Corrective Agentic RAG Architecture](Picture1.png)
-
 ### Core Components
 
 #### 1. **Central Agent (Brain) - Claude Sonnet 4.5**
