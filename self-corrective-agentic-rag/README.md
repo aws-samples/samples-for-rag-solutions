@@ -197,9 +197,13 @@ git clone https://github.com/aws-samples/samples-for-rag-solutions.git
 cd samples-for-rag-solutions/self-corrective-agentic-rag
 ```
 
-### 2. Install Dependencies
+### 2. Setup your python development environment and Install Dependencies
 
 ```bash
+python3 -m venv .venv
+
+source .venv/bin/activate
+
 pip install -r requirements.txt
 ```
 
@@ -235,9 +239,11 @@ export AWS_DEFAULT_REGION=us-east-1
 
 ### 5. Enable Bedrock Model Access
 
-Ensure you have access to the required models in Amazon Bedrock console:
-- Navigate to Amazon Bedrock → Model access
-- Request access for:
+Serverless foundation models are now automatically enabled across all AWS commercial regions when first invoked in your account, so you can start using them instantly. Note that for Anthropic models, first-time users may need to submit use case details before they can access the model. For models served from AWS Marketplace, a user with [AWS Marketplace permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html#model-access-permissions)  must invoke the model once to enable it account-wide for all users.
+
+Account administrators retain full control over model access through [IAM policies](https://docs.aws.amazon.com/bedrock/latest/userguide/security_iam_id-based-policy-examples.html)  and [Service Control Policies](https://aws.amazon.com/blogs/security/unlock-new-possibilities-aws-organizations-service-control-policy-now-supports-full-iam-language/)
+
+- This sample requires access for:
   - **Anthropic Claude Sonnet 4.5**
   - **Anthropic Claude Haiku 4.5**
 
