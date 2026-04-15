@@ -20,53 +20,7 @@ This project implements a **Self-Corrective Agentic Retrieval-Augmented Generati
 
 ### System Workflow
 
-```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│    User     │────▶│   Central    │────▶│  Retrieve   │
-│  Question   │     │    Agent     │     │  Context &  │
-└─────────────┘     │ (Sonnet 4.5) │     │   Check     │
-                    └──────────────┘     │  Relevance  │
-                            │            └─────────────┘
-                            ▼                    │
-                    ┌──────────────┐            │
-                    │   Select     │◀───────────┘
-                    │  Strategy    │
-                    └──────────────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        │                   │                   │
-        ▼                   ▼                   ▼
-┌──────────────┐   ┌──────────────┐   ┌──────────────┐
-│    Query     │   │    Query     │   │   Combined   │
-│  Expansion   │   │Decomposition │   │   Strategy   │
-│ (Haiku 4.5)  │   │ (Haiku 4.5)  │   │ (Haiku 4.5)  │
-└──────────────┘   └──────────────┘   └──────────────┘
-        │                   │                   │
-        └───────────────────┼───────────────────┘
-                            ▼
-                    ┌──────────────┐
-                    │   Generate   │
-                    │   Response   │
-                    │ (Haiku 4.5)  │
-                    └──────────────┘
-                            │
-                            ▼
-                    ┌──────────────┐
-                    │   Response   │◀──── Attempt < 3 ─┐
-                    │   Quality    │                   │
-                    │    Check     │                   │
-                    │ (Sonnet 4.5) │                   │
-                    └──────────────┘                   │
-                            │                          │
-                    ┌───────┴───────┐                  │
-                    │              │                  │
-              Good Quality    Poor Quality           │
-                    │              │                  │
-                    ▼              └──────────────────┘
-              ┌──────────┐              (Improve)
-              │   Done   │
-              └──────────┘
-```
+![Architecture Diagram](Self_Corrective_Agentic_RAG_System.png)
 
 ### Core Components
 
@@ -147,7 +101,7 @@ This architecture ensures **high-quality reasoning where it matters most** (orch
    - Central agent (Sonnet 4.5) receives and analyzes the query
 
 2. **Context Retrieval**
-   - System retrieves relevant documents from DynamoDB
+   - System retrieves relevant documents from Knowledge Bases and DynamoDB
    - Relevance checking filters low-quality context
    - If context is insufficient, triggers query refinement
 
@@ -180,13 +134,12 @@ This architecture ensures **high-quality reasoning where it matters most** (orch
 
 - **AWS Account** with appropriate permissions for:
   - Amazon Bedrock
+  - Bedrock Model Access for Claude Haiku 4.5 and Sonnet 4.5
   - Amazon DynamoDB
   - AWS Lambda (if using serverless deployment)
 - **Python 3.8+**
-- **AWS CLI** configured with credentials
-- **Amazon Bedrock Model Access** enabled for:
-  - **Anthropic Claude Sonnet 4.5** (required for Central Agent and Quality Inspector)
-  - **Anthropic Claude Haiku 4.5** (required for sub-agents)
+- **AWS CLI** configured with credentials (`aws configure`)
+- **Python 3.9+**
 
 ## 🚀 Installation
 
@@ -212,7 +165,7 @@ pip install -r requirements.txt
 - `strands` - AI Agent creation SDK
 - Additional ML/NLP libraries (see `requirements.txt`)
 
-### 3. Set Up DynamoDB Knowledge Base
+### 3. Set Up DynamoDB for Glossary Text
 
 Run the setup notebook to create DynamoDB table for storing abbreviations:
 
@@ -224,28 +177,12 @@ This notebook will:
 - Create necessary DynamoDB tables
 - Load synthetic or custom datasets
 
-### 4. Configure AWS Credentials
-Preferred
-```bash
-aws configure
-```
-
-Or set environment variables:
-```bash
-export AWS_ACCESS_KEY_ID=your_key_id
-export AWS_SECRET_ACCESS_KEY=your_secret_key
-export AWS_DEFAULT_REGION=us-east-1
-```
-
-### 5. Enable Bedrock Model Access
+### 4. Bedrock Model Access
 
 Serverless foundation models are now automatically enabled across all AWS commercial regions when first invoked in your account, so you can start using them instantly. Note that for Anthropic models, first-time users may need to submit use case details before they can access the model. For models served from AWS Marketplace, a user with [AWS Marketplace permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html#model-access-permissions)  must invoke the model once to enable it account-wide for all users.
 
 Account administrators retain full control over model access through [IAM policies](https://docs.aws.amazon.com/bedrock/latest/userguide/security_iam_id-based-policy-examples.html)  and [Service Control Policies](https://aws.amazon.com/blogs/security/unlock-new-possibilities-aws-organizations-service-control-policy-now-supports-full-iam-language/)
 
-- This sample requires access for:
-  - **Anthropic Claude Sonnet 4.5**
-  - **Anthropic Claude Haiku 4.5**
 
 ## 💻 Usage
 
@@ -255,21 +192,18 @@ This solution is implemented as a **Jupyter notebook** that demonstrates the com
 
 1. **Start Jupyter**:
 ```bash
-jupyter notebook 01-setup-create-insert-dynamodb.ipynb
 jupyter notebook 02-self-corrective-agentic-rag.ipynb
 ```
 
 2. **Execute cells sequentially** to:
    - Initialize AWS Bedrock clients for Claude Sonnet 4.5 and Haiku 4.5
-   - Set up DynamoDB connections
+   - Set up DynamoDB connections (done using 01-setup-create-insert-dynamodb.ipynb)
    - Configure the central agent and sub-agents
    - Define quality evaluation criteria
    - Run example queries through the self-corrective workflow
 
 3. **The notebook demonstrates**:
-   - Complete workflow execution with detailed logging
    - Query examples with different strategies (expansion, decomposition, combined)
-   - Visualization of correction iterations
    - Performance metrics and quality scores
    - Comparison between standard RAG and self-corrective RAG
 
