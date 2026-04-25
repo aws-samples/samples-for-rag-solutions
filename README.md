@@ -9,6 +9,7 @@ This repository is a repository of RAG(Retrieval Augmented Generation) based Gen
 - [Advanced RAG Assistant with Hosted Streamlit App](advanced-rag-assistant-with-hosted-streamlit-app) - An enhancement to the Advanced RAG Assistant that includes a hosted Streamlit application on AWS with infrastructure as code for easy deployment to your AWS environment.
 
 - [Legal RFI Solution](legal-rfi-assistant) - A Generative AI-powered application that automatically generates draft responses for Request for Information (RFI) and Request for Proposal (RFP) questions using Amazon Bedrock Knowledge Bases and RAG.
+- [Self Corrective Agentic RAG](self-corrective-agentic-rag) – A Self-Corrective Agentic RAG system that enhances traditional RAG architectures with autonomous correction capabilities and iterative quality refinement. The solution leverages agentic workflows powered by Amazon Bedrock to automatically evaluate and improve response quality through intelligent feedback loops.
 
 ## Getting Started
 
